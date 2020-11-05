@@ -109,12 +109,19 @@ export class Workspaces {
   }
 
   private readSchematicsJson(collectionName: string, schematic: string) {
-    const packageJsonPath = require.resolve(`${collectionName}/package.json`);
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
-    const schematicsFile = packageJson.schematics;
-    const schematicsFilePath = require.resolve(
-      path.join(path.dirname(packageJsonPath), schematicsFile)
-    );
+    let schematicsFilePath;
+    if (collectionName.endsWith('.json')) {
+      schematicsFilePath = require.resolve(collectionName);
+    } else {
+      const packageJsonPath = require.resolve(`${collectionName}/package.json`);
+      const packageJson = JSON.parse(
+        fs.readFileSync(packageJsonPath).toString()
+      );
+      const schematicsFile = packageJson.schematics;
+      schematicsFilePath = require.resolve(
+        path.join(path.dirname(packageJsonPath), schematicsFile)
+      );
+    }
     const schematicsJson = JSON.parse(
       fs.readFileSync(schematicsFilePath).toString()
     );

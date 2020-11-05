@@ -206,12 +206,15 @@ export async function generate(
         opts.interactive
       );
       const host = new FsTree(root, isVerbose, logger);
-      await implementation(combinedOpts)(host);
+      const task = await implementation(combinedOpts)(host);
       const changes = host.listChanges();
 
       printChanges(changes);
       if (!opts.dryRun) {
         flushChanges(root, changes);
+        if (task) {
+          await task(host);
+        }
       } else {
         logger.warn(`\nNOTE: The "dryRun" flag means no changes were made.`);
       }
