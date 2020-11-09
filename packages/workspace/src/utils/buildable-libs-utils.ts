@@ -325,3 +325,16 @@ function hasDependency(outputJson, depConfigName: string, packageName: string) {
     return false;
   }
 }
+
+export function resolveAllProjectFileReplacements (projGraph: ProjectGraph, configuration: string) {
+  const projects = Object.values(projGraph.nodes);
+  const fileReplacements = projects.reduce((allReplacements, project) => {
+    const projectReplacements = project?.data?.architect?.build?.configurations?.[configuration]?.fileReplacements;
+    if (projectReplacements) {
+        allReplacements.push(...projectReplacements);
+    }
+    return allReplacements;
+  }, [])
+
+  return fileReplacements;
+}

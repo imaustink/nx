@@ -8,12 +8,13 @@ import { map, concatMap } from 'rxjs/operators';
 import { getNodeWebpackConfig } from '../../utils/node.config';
 import { OUT_FILENAME } from '../../utils/config';
 import { BuildBuilderOptions } from '../../utils/types';
-import { normalizeBuildOptions } from '../../utils/normalize';
+import { normalizeBuildOptions, normalizeFileReplacements } from '../../utils/normalize';
 import { NodeJsSyncHost } from '@angular-devkit/core/node';
 import { createProjectGraph } from '@nrwl/workspace/src/core/project-graph';
 import {
   calculateProjectDependencies,
   createTmpTsConfig,
+  resolveAllProjectFileReplacements,
 } from '@nrwl/workspace/src/utils/buildable-libs-utils';
 
 try {
@@ -37,6 +38,14 @@ function run(
   options: JsonObject & BuildNodeBuilderOptions,
   context: BuilderContext
 ): Observable<NodeBuildEvent> {
+  const { configuration } = context.target;
+
+  if (options.useGlobalFileReplacements) {
+    const projGraph = createProjectGraph();
+    const fileReplacements = resolveAllProjectFileReplacements(projGraph, configuration);
+    options.fileReplacements = normalizeFileReplacements(context.workspaceRoot, fileReplacements);
+  }
+
   if (!options.buildLibsFromSource) {
     const projGraph = createProjectGraph();
     const { target, dependencies } = calculateProjectDependencies(
@@ -60,7 +69,7 @@ function run(
       if (options.webpackConfig) {
         config = require(options.webpackConfig)(config, {
           options,
-          configuration: context.target.configuration,
+          configuration,
         });
       }
       return config;
