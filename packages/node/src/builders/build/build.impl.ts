@@ -33,7 +33,7 @@ export type NodeBuildEvent = BuildResult & {
 
 export default createBuilder<JsonObject & BuildNodeBuilderOptions>(run);
 
-function run(
+export function run(
   options: JsonObject & BuildNodeBuilderOptions,
   context: BuilderContext
 ): Observable<NodeBuildEvent> {
